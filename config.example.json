@@ -1,0 +1,15 @@
+{
+    "token": "",
+    "presenceVanityRep": {
+        "enabled": false,
+        "vanity": "",
+        "repRoleId": ""
+    },
+    "vanityJoinKick": {
+        "enabled": false,
+        "guildId": ""
+    },
+    "voiceChatTTS": {
+        "enabled": true
+    }
+}

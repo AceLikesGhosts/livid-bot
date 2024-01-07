@@ -40,11 +40,11 @@ export default [
 
             let ttsMessage: string;
             if(lastSpeaker === message.author) {
-                ttsMessage = message.content;
+                ttsMessage = message.cleanContent;
             }
             else {
                 lastSpeaker = message.author;
-                ttsMessage = `${ message.member?.displayName } said ${ message.content }`;
+                ttsMessage = `${ message.member?.displayName } said ${ message.cleanContent }`;
             };
 
             const resource = createAudioResource(gtts.stream(ttsMessage));

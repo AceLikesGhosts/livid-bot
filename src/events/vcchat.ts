@@ -10,6 +10,8 @@ import { Logger } from '../logger';
 import ngtts from 'node-gtts';
 const gtts = new ngtts('en');
 
+/** seconds 👇 */
+const DISCONNECT_TIME = 15 * 1000;
 let dcTimer: NodeJS.Timeout | null;
 let lastSpeaker: User;
 
@@ -50,7 +52,7 @@ export default [
             const resource = createAudioResource(gtts.stream(ttsMessage));
 
             connection?.subscribe(player);
-            Logger.log(`playing message ${ ttsMessage }`);
+            Logger.log(`playing message "${ ttsMessage }" by ${ message.member?.displayName }`);
             player.play(resource);
 
             player.on('stateChange', (_, state) => {
@@ -60,7 +62,7 @@ export default [
                         dcTimer = setTimeout(() => {
                             Logger.log(`disconnected from vc ${ (message.channel as TextChannel).name || 'UNKNOWN? (left while playing)' } (${ message.channel.id }, ${ message.guild?.id })`);
                             connection.destroy();
-                        }, 15 * 1000);
+                        }, DISCONNECT_TIME);
                     }
                 }
             });

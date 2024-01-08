@@ -47,7 +47,7 @@ export default async function init(client: Client): Promise<void> {
             }
 
             Logger.log(`Registered event ${ event.on } from ${ file.substr(file.lastIndexOf('/'), file.length) }`);
-            client.on(event.on, event.listener as (...args: any) => Awaitable<any>);
+            client.on(event.on, event.listener.bind(event) as (...args: any) => Awaitable<any>);
         }
     }
 }

@@ -12,6 +12,7 @@ const gtts = new ngtts('en');
 
 /** seconds 👇 */
 const DISCONNECT_TIME = 15 * 1000;
+
 let dcTimer: NodeJS.Timeout | null;
 let lastSpeaker: User;
 
@@ -22,6 +23,12 @@ export default [
         async listener(message) {
             // don't care! we only want to TTS voice chat channel messages
             if(message.channel.type !== ChannelType.GuildVoice || !message.guild?.id || message.author.bot) {
+                return;
+            }
+
+            if(config.voiceChatTTS.inVCOnly && !message.member?.voice.channel || message.member?.voice.channel !== message.channel) {
+                // Simply react to inform them that their message was not read VIA TTS.
+                await message.react(':x:');
                 return;
             }
 

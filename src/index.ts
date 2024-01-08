@@ -17,10 +17,20 @@ const client = new Client({
 
 client.on('ready', (me) => {
     Logger.log(`Logged in as ${ me.user.username }`);
-    me.user.setActivity({
-        name: `/${ config.presenceVanityRep.vanity }`,
-        type: ActivityType.Watching
-    });
+
+    if(config.vanity.enabled && config.vanity.link) {
+        me.user.setActivity({
+            name: `/${ config.vanity.link }`,
+            type: ActivityType.Watching
+        });
+    }
+    else {
+        me.user.setActivity({
+            name: '>~<',
+            type: ActivityType.Competing
+        });
+    }
+
     Logger.log('Applied activity.');
 });
 

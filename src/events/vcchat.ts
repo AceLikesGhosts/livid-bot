@@ -28,7 +28,7 @@ export default [
 
             if(config.voiceChatTTS.inVCOnly && !message.member?.voice?.channel || message.member?.voice?.channel !== message.channel) {
                 // Simply react to inform them that their message was not read VIA TTS.
-                await message.react(':x:');
+                await message.react('❌');
                 return;
             }
 

@@ -1,8 +1,11 @@
 {
     "token": "",
+    "vanity": {
+        "enabled": false,
+        "link": ""
+    },
     "presenceVanityRep": {
         "enabled": false,
-        "vanity": "",
         "repRoleId": ""
     },
     "vanityJoinKick": {
@@ -10,6 +13,11 @@
         "guildId": ""
     },
     "voiceChatTTS": {
-        "enabled": true
+        "enabled": true,
+        "inVCOnly": true,
+        "ttsban": {
+            "enabled": false,
+            "roleId": ""
+        }
     }
 }

@@ -3,7 +3,8 @@ import chalk from 'chalk';
 import { Logger } from '../logger';
 import config from '../../config.json';
 import { Events } from '../types/Event';
-const { enabled, repRoleId, vanity } = config.presenceVanityRep;
+const { enabled, repRoleId } = config.presenceVanityRep;
+const { link: vanity } = config.vanity;
 
 const validStates = [`/${ vanity }`, `.gg/${ vanity }`, `gg/${ vanity }`];
 const hasPresence = (presence: Presence) => {

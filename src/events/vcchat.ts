@@ -51,7 +51,7 @@ function playNextInQueue(): void {
     }
 
     const now = queue.splice(0, 1)[0]; // gets first element, and shifts everything
-    Logger.log(`[VcChat]: Playing message from queue (${now.message.author.username} | ${now.message.cleanContent})`)
+    Logger.log(`[VcChat]: Playing message from queue (${ now.message.author.username } | ${ now.message.cleanContent })`);
     return play(now.message);
 }
 
@@ -76,6 +76,8 @@ function connectToVC(channelId: string, guildId: string, voiceAdapterCreator: In
 
 function play(message: Message): void {
     const [connection, player] = connectToVC(message.channel.id, message.guild!.id, message.guild!.voiceAdapterCreator);
+    clearTimeout(dcTimer!);
+    dcTimer = null;
 
     const content = parseContent(message);
     let ttsMessage: string;
@@ -83,15 +85,14 @@ function play(message: Message): void {
         ttsMessage = content;
     }
     else {
-        lastSpeaker = message.author;
         ttsMessage = `${ message.member?.displayName } said ${ content }`;
     };
-
+    lastSpeaker = message.author;
 
     const resource = createAudioResource(gtts.stream(ttsMessage));
 
     if(isSpeaking) {
-        Logger.log(`[VcChat]: Added message by ${message.author.username} to queue (${message.cleanContent})`);
+        Logger.log(`[VcChat]: Added message by ${ message.author.username } to queue (${ message.cleanContent })`);
         queue.push({ message: message });
         return;
     }
@@ -105,8 +106,8 @@ function play(message: Message): void {
         if(state.status === AudioPlayerStatus.Idle) {
             isSpeaking = false;
             playNextInQueue();
-            Logger.log(`[VcChat]: set disconnect timeout to 15 seconds`);
-            if(connection) {
+            if(connection && connection.state.status !== VoiceConnectionStatus.Destroyed) {
+                Logger.log(`[VcChat]: set disconnect timeout to 15 seconds`);
                 dcTimer = setTimeout(() => {
                     Logger.log(`[VcChat]: disconnected from vc ${ (message.channel as TextChannel)?.name || 'UNKNOWN? (left while playing)' } (${ message.channel.id }, ${ message.guild?.id })`);
                     connection.destroy();

@@ -34,6 +34,10 @@ function parseContent(message: Message): string {
         content.replace(result, split[1]);
     }
 
+    if(message.attachments) {
+        content += ` ${ message.attachments.size } attachments`;
+    }
+
     return content;
 }
 
@@ -85,7 +89,6 @@ export default [
                 ttsMessage = `${ message.member?.displayName } said ${ content }`;
             };
 
-
             const resource = createAudioResource(gtts.stream(ttsMessage));
 
             connection?.subscribe(player);
@@ -94,10 +97,10 @@ export default [
 
             player.on('stateChange', (_, state) => {
                 if(state.status === AudioPlayerStatus.Idle) {
-                    Logger.log(`set disconnect timeout to 15 seconds`);
+                    Logger.log(`[VcChat]: set disconnect timeout to 15 seconds`);
                     if(connection) {
                         dcTimer = setTimeout(() => {
-                            Logger.log(`disconnected from vc ${ (message.channel as TextChannel).name || 'UNKNOWN? (left while playing)' } (${ message.channel.id }, ${ message.guild?.id })`);
+                            Logger.log(`[VcChat]: disconnected from vc ${ (message.channel as TextChannel).name || 'UNKNOWN? (left while playing)' } (${ message.channel.id }, ${ message.guild?.id })`);
                             connection.destroy();
                         }, DISCONNECT_TIME);
                     }

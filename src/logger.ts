@@ -2,8 +2,8 @@ import chalk from 'chalk';
 
 export const Logger = {
     log: (message: unknown, ...optionalData: unknown[]) => {
-        console.log(  
-            `${chalk.green('LOG')} ${chalk.bgGreen(`${new Date().toLocaleString()}`)}`,
+        console.log(
+            `${ chalk.green('LOG') } ${ chalk.bgGreen(`${ new Date().toLocaleString() }`) }`,
             message,
             ...optionalData
         );

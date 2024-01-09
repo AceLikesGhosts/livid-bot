@@ -1,4 +1,4 @@
-import { ActivityType, type Client, type Presence } from 'discord.js';
+import { ActivityType, type Presence } from 'discord.js';
 import chalk from 'chalk';
 import { Logger } from '../logger';
 import config from '../../config.json';
@@ -25,19 +25,19 @@ export default [
         listener: (op, np) => {
             const member = np.member;
             if(!member) {
-                Logger.warn(`Recieved presenceUpdate for ${ np } but .member was not found`, np);
+                Logger.warn(`[Presence]: Recieved presenceUpdate for ${ np } but .member was not found`, np);
                 return;
             }
 
             const newHas = hasPresence(np);
             if(newHas) {
                 if(member.roles.cache.has(repRoleId)) {
-                    Logger.warn(chalk.yellow(`Discord sent weird data? User had REP_ROLE_ID yet just now added vanity to presence.`));
+                    Logger.warn(chalk.yellow(`[Presence]: Discord sent weird data? User had REP_ROLE_ID yet just now added vanity to presence.`));
                     return;
                 }
 
                 member.roles.add(repRoleId);
-                Logger.log(`Added REP_ROLE_ID to user ${ member.user }`);
+                Logger.log(`[Presence]: Added REP_ROLE_ID to user ${ member.user }`);
                 return;
             }
 
@@ -48,12 +48,12 @@ export default [
             const oldHas = hasPresence(op);
             if(oldHas && !newHas) {
                 if(!member.roles.cache.has(repRoleId)) {
-                    Logger.warn(chalk.yellow(`Discord sent weird data? User did not have REP_ROLE_ID yet removed the vanity from their bio with their old having it?`));
+                    Logger.warn(chalk.yellow(`[Presence]: Discord sent weird data? User did not have REP_ROLE_ID yet removed the vanity from their bio with their old having it?`));
                     return;
                 }
 
                 member.roles.remove(repRoleId);
-                Logger.log(`Removed REP_ROLE_ID from ${ member.user }`);
+                Logger.log(`[Presence]: Removed REP_ROLE_ID from ${ member.user }`);
             }
         }
     }

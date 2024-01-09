@@ -31,12 +31,12 @@ export default [
                             text: `@ ${ new Date().toUTCString() } via ${ member.client.user.username }`
                         }
                     }]
-                }).catch(() => Logger.error(`Failed to send message to ${member.user.username}`));
+                }).catch(() => Logger.error(`Failed to send message to ${ member.user.username }`));
                 await member.kick(`Joined through Vanity.`);
                 return;
             }
 
-            Logger.log(`[VanityKick]: ${member.user.username} joined via none vanity invite`);
+            Logger.log(`[VanityKick]: ${ member.user.username } joined via none vanity invite`);
         },
     },
     {

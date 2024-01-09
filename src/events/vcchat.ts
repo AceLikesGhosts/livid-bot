@@ -89,6 +89,7 @@ export default [
                 ttsMessage = `${ message.member?.displayName } said ${ content }`;
             };
 
+
             const resource = createAudioResource(gtts.stream(ttsMessage));
 
             connection?.subscribe(player);

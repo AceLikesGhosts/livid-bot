@@ -16,7 +16,7 @@
   },
   "include": [
     "./src/**/*.ts"
-  ],
+, "OLD_vcchat.ts"  ],
   "exclude": [
     "node_modules"
   ]

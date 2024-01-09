@@ -1,10 +1,10 @@
 import config from '../../config.json';
 const { enabled } = config.voiceChatTTS;
 
-import { ChannelType, Message, TextChannel, User } from 'discord.js';
+import { ChannelType, InternalDiscordGatewayAdapterCreator, Message, TextChannel, User } from 'discord.js';
 import { Events } from '../types/Event';
 
-import { AudioPlayerStatus, NoSubscriberBehavior, VoiceConnection, createAudioPlayer, createAudioResource, getVoiceConnection, joinVoiceChannel } from '@discordjs/voice';
+import { AudioPlayer, AudioPlayerStatus, NoSubscriberBehavior, VoiceConnection, VoiceConnectionStatus, createAudioPlayer, createAudioResource, getVoiceConnection, joinVoiceChannel } from '@discordjs/voice';
 import { Logger } from '../logger';
 
 import ngtts from 'node-gtts';
@@ -15,6 +15,9 @@ const DISCONNECT_TIME = 15 * 1000;
 
 let dcTimer: NodeJS.Timeout | null;
 let lastSpeaker: User;
+
+let isSpeaking: boolean = false;
+let queue: { message: Message; }[] = [];
 
 /**
  * Takes a message and returns a clean version of the content in
@@ -41,6 +44,78 @@ function parseContent(message: Message): string {
     return content;
 }
 
+function playNextInQueue(): void {
+    if(queue.length <= 0) {
+        Logger.log(`[VcChat]: Hit bottom of queue`);
+        return;
+    }
+
+    const now = queue.splice(0, 1)[0]; // gets first element, and shifts everything
+    Logger.log(`[VcChat]: Playing message from queue (${now.message.author.username} | ${now.message.cleanContent})`)
+    return play(now.message);
+}
+
+function connectToVC(channelId: string, guildId: string, voiceAdapterCreator: InternalDiscordGatewayAdapterCreator): [VoiceConnection, AudioPlayer] {
+    const connection: VoiceConnection = getVoiceConnection(channelId)! || joinVoiceChannel({
+        channelId: channelId,
+        guildId: guildId,
+        adapterCreator: voiceAdapterCreator
+    });
+
+    clearTimeout(dcTimer!);
+    dcTimer = null;
+
+    const player = createAudioPlayer({
+        behaviors: {
+            noSubscriber: NoSubscriberBehavior.Pause,
+        },
+    });
+
+    return [connection, player];
+}
+
+function play(message: Message): void {
+    const [connection, player] = connectToVC(message.channel.id, message.guild!.id, message.guild!.voiceAdapterCreator);
+
+    const content = parseContent(message);
+    let ttsMessage: string;
+    if(lastSpeaker === message.author) {
+        ttsMessage = content;
+    }
+    else {
+        lastSpeaker = message.author;
+        ttsMessage = `${ message.member?.displayName } said ${ content }`;
+    };
+
+
+    const resource = createAudioResource(gtts.stream(ttsMessage));
+
+    if(isSpeaking) {
+        Logger.log(`[VcChat]: Added message by ${message.author.username} to queue (${message.cleanContent})`);
+        queue.push({ message: message });
+        return;
+    }
+
+    connection?.subscribe(player);
+    Logger.log(`[VcChat]: playing message "${ ttsMessage }" by ${ message.member?.displayName }`);
+    player.play(resource);
+    isSpeaking = true;
+
+    player.on('stateChange', (_, state) => {
+        if(state.status === AudioPlayerStatus.Idle) {
+            isSpeaking = false;
+            playNextInQueue();
+            Logger.log(`[VcChat]: set disconnect timeout to 15 seconds`);
+            if(connection) {
+                dcTimer = setTimeout(() => {
+                    Logger.log(`[VcChat]: disconnected from vc ${ (message.channel as TextChannel)?.name || 'UNKNOWN? (left while playing)' } (${ message.channel.id }, ${ message.guild?.id })`);
+                    connection.destroy();
+                }, DISCONNECT_TIME);
+            }
+        }
+    });
+}
+
 export default [
     {
         on: 'messageCreate',
@@ -64,49 +139,7 @@ export default [
                 return;
             }
 
-            let connection: VoiceConnection = getVoiceConnection(message.channel.id)! || joinVoiceChannel({
-                channelId: message.channel.id,
-                guildId: message.guild!.id,
-                adapterCreator: message.guild!.voiceAdapterCreator
-            });
-
-            clearTimeout(dcTimer!);
-            dcTimer = null;
-
-            const player = createAudioPlayer({
-                behaviors: {
-                    noSubscriber: NoSubscriberBehavior.Pause,
-                },
-            });
-
-            const content = parseContent(message);
-            let ttsMessage: string;
-            if(lastSpeaker === message.author) {
-                ttsMessage = content;
-            }
-            else {
-                lastSpeaker = message.author;
-                ttsMessage = `${ message.member?.displayName } said ${ content }`;
-            };
-
-
-            const resource = createAudioResource(gtts.stream(ttsMessage));
-
-            connection?.subscribe(player);
-            Logger.log(`playing message "${ ttsMessage }" by ${ message.member?.displayName }`);
-            player.play(resource);
-
-            player.on('stateChange', (_, state) => {
-                if(state.status === AudioPlayerStatus.Idle) {
-                    Logger.log(`[VcChat]: set disconnect timeout to 15 seconds`);
-                    if(connection) {
-                        dcTimer = setTimeout(() => {
-                            Logger.log(`[VcChat]: disconnected from vc ${ (message.channel as TextChannel).name || 'UNKNOWN? (left while playing)' } (${ message.channel.id }, ${ message.guild?.id })`);
-                            connection.destroy();
-                        }, DISCONNECT_TIME);
-                    }
-                }
-            });
+            return play(message);
         },
     }
 ] satisfies Events<['messageCreate']>;

@@ -109,6 +109,7 @@ function play(message: Message): void {
             if(connection && connection.state.status !== VoiceConnectionStatus.Destroyed) {
                 Logger.log(`[VcChat]: set disconnect timeout to 15 seconds`);
                 dcTimer = setTimeout(() => {
+                    if(connection.state.status === VoiceConnectionStatus.Destroyed) return Logger.error(`[VcChat]: almost attempted to destory Connection while it's already destroyed, wtf?`);
                     Logger.log(`[VcChat]: disconnected from vc ${ (message.channel as TextChannel)?.name || 'UNKNOWN? (left while playing)' } (${ message.channel.id }, ${ message.guild?.id })`);
                     connection.destroy();
                 }, DISCONNECT_TIME);

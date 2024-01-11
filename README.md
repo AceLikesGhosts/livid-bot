@@ -15,24 +15,18 @@ a simple bot for [Livid](discord.gg/livid)
 
   <details id="vanity-presecne-repping">
     <summary>Vanity Presence Repping</summary>
-
     <p>Gives a role if someone includes the vanity link within their custom status.</p>
-
   </details>
 
   <details id="vanity-join-kick">
     <summary>Vanity Join Kick</summary>
-
     <p>Detects if someone joins through a vanity link, and kicks them.</<p>>
     <p>Has an option for a log channel.</p>
-
   </details>
 
   <details id="tts">
     <summary>Voice Chat Text-To-Speech</summary>
-
     <p>Takes incoming messages within a voice channel's text area, and reads them out using Google's text to speech API.</p>
-
   </details>
 </details>
 

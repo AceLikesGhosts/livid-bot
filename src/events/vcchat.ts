@@ -51,7 +51,7 @@ function parseContent(message: Message): string {
     return content;
 }
 
-function playNextInQueue(): void {
+async function playNextInQueue(): Promise<void> {
     if(queue.length <= 0) {
         Logger.log(`[VcChat]: Hit bottom of queue`);
         return;
@@ -69,8 +69,10 @@ function connectToVC(channelId: string, guildId: string, voiceAdapterCreator: In
         adapterCreator: voiceAdapterCreator
     });
 
-    clearTimeout(dcTimer!);
-    dcTimer = null;
+    if(dcTimer !== null) {
+        clearTimeout(dcTimer!);
+        dcTimer = null;
+    }
 
     const player = createAudioPlayer({
         behaviors: {
@@ -87,13 +89,15 @@ function play(message: Message): void {
         queue.push({ message: message });
         return;
     }
+    
+    if(dcTimer !== null) {
+        clearTimeout(dcTimer!);
+        dcTimer = null;
+    }
 
     const [connection, player] = connectToVC(message.channel.id, message.guild!.id, message.guild!.voiceAdapterCreator);
-    clearTimeout(dcTimer!);
-    dcTimer = null;
 
     const content = parseContent(message);
-    console.log(`parsed message content "${message.content}" to "${content}"`);
     let ttsMessage: string;
 
     if(lastSpeaker === message.author) {
@@ -111,10 +115,10 @@ function play(message: Message): void {
     player.play(resource);
     isSpeaking = true;
 
-    player.on('stateChange', (_, state) => {
+    player.on('stateChange', async (_, state) => {
         if(state.status === AudioPlayerStatus.Idle) {
             isSpeaking = false;
-            playNextInQueue();
+            await playNextInQueue();
             if(connection && connection.state.status !== VoiceConnectionStatus.Destroyed) {
                 Logger.log(`[VcChat]: set disconnect timeout to 15 seconds`);
                 dcTimer = setTimeout(() => {

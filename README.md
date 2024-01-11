@@ -40,7 +40,7 @@ a simple bot for [Livid](discord.gg/livid)
 
 A generic configuration option will look around the following:
 
-```json
+```jsonc
 {
   "featureName": {
     "enabled": true, // if the feature is enabled/if we should register it

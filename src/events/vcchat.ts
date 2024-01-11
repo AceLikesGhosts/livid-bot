@@ -57,6 +57,11 @@ async function playNextInQueue(): Promise<void> {
         return;
     }
 
+    if(dcTimer !== null) {
+        clearTimeout(dcTimer!);
+        dcTimer = null;
+    }
+
     const now = queue.splice(0, 1)[0]; // gets first element, and shifts everything
     Logger.log(`[VcChat]: Playing message from queue (${ now.message.author.username } | ${ now.message.cleanContent })`);
     return play(now.message);
@@ -84,15 +89,15 @@ function connectToVC(channelId: string, guildId: string, voiceAdapterCreator: In
 }
 
 function play(message: Message): void {
+    if(dcTimer !== null) {
+        clearTimeout(dcTimer!);
+        dcTimer = null;
+    }
+
     if(isSpeaking) {
         Logger.log(`[VcChat]: Added message by ${ message.author.username } to queue (${ message.cleanContent })`);
         queue.push({ message: message });
         return;
-    }
-    
-    if(dcTimer !== null) {
-        clearTimeout(dcTimer!);
-        dcTimer = null;
     }
 
     const [connection, player] = connectToVC(message.channel.id, message.guild!.id, message.guild!.voiceAdapterCreator);

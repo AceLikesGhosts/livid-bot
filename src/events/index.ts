@@ -28,7 +28,7 @@ export default async function init(client: Client): Promise<void> {
     Logger.log('Fetched event file paths', files);
 
     if(files.length === 0) {
-        Logger.error('There were no events to register, skipping init');
+        Logger.error('MAIN::EVENTS', 'There were no events to register, skipping init');
         return;
     }
 
@@ -42,11 +42,11 @@ export default async function init(client: Client): Promise<void> {
             const event = events[j];
             
             if(!event.enabled) {
-                Logger.log(`Skipping event ${ event.on } because it was disabled.`);
+                Logger.log('MAIN::EVENTS', `Skipping event ${ event.on } because it was disabled.`);
                 return;
             }
 
-            Logger.log(`Registered event ${ event.on } from ${ file.substr(file.lastIndexOf('/'), file.length) }`);
+            Logger.log('MAIN::EVENTS', `Registered event ${ event.on } from ${ file.substr(file.lastIndexOf('/'), file.length) }`);
             client.on(event.on, event.listener.bind(event) as (...args: any) => Awaitable<any>);
         }
     }

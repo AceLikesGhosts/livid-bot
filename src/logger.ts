@@ -1,23 +1,23 @@
 import chalk from 'chalk';
 
 export const Logger = {
-    log: (message: unknown, ...optionalData: unknown[]) => {
+    log: (prefix: string, message: unknown, ...optionalData: unknown[]) => {
         console.log(
-            `${ chalk.green('LOG') } ${ chalk.bgGreen(`${ new Date().toLocaleString() }`) }`,
+            `${ chalk.green('LOG') } ${ chalk.bgGreen(`${ new Date().toLocaleString() }`) } ${ chalk.magenta(`[${ prefix }]:`) }`,
             message,
             ...optionalData
         );
     },
-    warn: (message: unknown, ...optionalData: unknown[]) => {
+    warn: (prefix: string, message: unknown, ...optionalData: unknown[]) => {
         console.log(
-            `${ chalk.yellow('WARN') } ${ chalk.bgGreen(`${ new Date().toLocaleString() }`) }`,
+            `${ chalk.yellow('WARN') } ${ chalk.bgGreen(`${ new Date().toLocaleString() }`) } ${ chalk.magenta(`[${ prefix }]:`) }`,
             message,
             ...optionalData
         );
     },
-    error: (message: unknown, ...optionalData: unknown[]) => {
+    error: (prefix: string, message: unknown, ...optionalData: unknown[]) => {
         console.log(
-            `${ chalk.red('ERROR') } ${ chalk.bgGreen(`${ new Date().toLocaleString() }`) }`,
+            `${ chalk.red('ERROR') } ${ chalk.bgGreen(`${ new Date().toLocaleString() }`) } ${ chalk.magenta(`[${ prefix }]:`) }`,
             message,
             ...optionalData
         );

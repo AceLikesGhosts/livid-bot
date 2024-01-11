@@ -16,7 +16,7 @@ const client = new Client({
 });
 
 client.on('ready', (me) => {
-    Logger.log(`Logged in as ${ me.user.username }`);
+    Logger.log('MAIN', `Logged in as ${ me.user.username }`);
 
     if(config.vanity.enabled && config.vanity.link) {
         me.user.setActivity({
@@ -31,12 +31,12 @@ client.on('ready', (me) => {
         });
     }
 
-    Logger.log('Applied activity.');
+    Logger.log('MAIN', 'Applied activity.');
 });
 
 
 void init(client);
 
 client.login(process.env.TOKEN || config.token).catch(() => {
-    Logger.error(`Failed to find token under "process.env.TOKEN" or "config.token"`);
+    Logger.error('MAIN', `Failed to find token under "process.env.TOKEN" or "config.token"`);
 });

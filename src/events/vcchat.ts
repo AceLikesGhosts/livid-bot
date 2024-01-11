@@ -28,32 +28,32 @@ type LastVoiceData = {
 
 function resetDisconnectTimer(): void {
     if(dcTimer && dcTimer !== null) {
-        Logger.log(`[VcChat]: Started disconnect timer for ${ DISCONNECT_TIME_IN_SECONDS }s`);
+        Logger.log('VcChat', `Started disconnect timer for ${ DISCONNECT_TIME_IN_SECONDS }s`);
         clearTimeout(dcTimer);
         dcTimer = null;
     }
-    else Logger.error(`[VcChat]: Tried to reset disconnect timer but it did not exist`);
+    else Logger.error('VcChat', `Tried to reset disconnect timer but it did not exist`);
 }
 
 function startDisconnectTimer(connection: VoiceConnection, lastPlace: LastVoiceData): void {
     if(dcTimer) resetDisconnectTimer();
-    Logger.log(`[VcChat]: Started disconnect timer for ${ DISCONNECT_TIME_IN_SECONDS }s`);
+    Logger.log('VcChat', `Started disconnect timer for ${ DISCONNECT_TIME_IN_SECONDS }s`);
     dcTimer = setTimeout(() => {
-        if(connection.state.status === VoiceConnectionStatus.Destroyed) return Logger.error(`[VcChat]: almost attempted to destory Connection while it's already destroyed, wtf?`);
-        Logger.log(`[VcChat]: disconnected from vc ${ (lastPlace.channel as TextChannel)?.name || 'UNKNOWN? (left while playing)' } (${ lastPlace.channel.id }, ${ lastPlace.guild?.id })`);
+        if(connection.state.status === VoiceConnectionStatus.Destroyed) return Logger.error('VcChat', `almost attempted to destory Connection while it's already destroyed, wtf?`);
+        Logger.log('VcChat', `disconnected from vc ${ (lastPlace.channel as TextChannel)?.name || 'UNKNOWN? (left while playing)' } (${ lastPlace.channel.id }, ${ lastPlace.guild?.id })`);
         connection.destroy();
     }, DISCONNECT_TIME);
 }
 
 function playNextInQueue(connection: VoiceConnection, lastPlace: LastVoiceData): void {
     if(queue.length === 0) {
-        Logger.log(`[VcChat]: Hit bottom of queue`);
+        Logger.log('VcChat', `Hit bottom of queue`);
         startDisconnectTimer(connection, lastPlace);
         return;
     }
 
     const now = queue.splice(0, 1)[0]; // gets first element, and shifts everything
-    Logger.log(`[VcChat]: Playing message from queue (${ now.author.username } | ${ now.cleanContent })`);
+    Logger.log('VcChat', `Playing message from queue (${ now.author.username } | ${ now.cleanContent })`);
     return play(now);
 }
 
@@ -63,13 +63,13 @@ function playNextInQueue(connection: VoiceConnection, lastPlace: LastVoiceData):
 function shouldReadMessage(message: Message): boolean {
     if(config.voiceChatTTS.inVCOnly.enabled && !message.member?.voice.channel) {
         if(config.voiceChatTTS.inVCOnly.ignoreAdmins && message.member?.permissions.has(PermissionsBitField.Flags.Administrator)) return true;
-        Logger.log(`[VcChat]: ${ message.author.username } tried to send a message while not in the voice channel`);
+        Logger.log('VcChat', `${ message.author.username } tried to send a message while not in the voice channel`);
         return false;
     }
 
     if(config.voiceChatTTS.ttsban.enabled && message.member?.roles.cache.has(config.voiceChatTTS.ttsban.roleId)) {
         if(config.voiceChatTTS.ttsban.ignoreAdmins && message.member.permissions.has(PermissionsBitField.Flags.Administrator)) return true;
-        Logger.log(`[VcChat]: ${ message.author.username } tried to send a message while TTS banned`);
+        Logger.log('VcChat', `${ message.author.username } tried to send a message while TTS banned`);
         return false;
     }
 
@@ -98,7 +98,7 @@ function play(message: Message): void {
     resetDisconnectTimer(); // just in case
 
     if(isSpeaking) {
-        Logger.log(`[VcChat]: Added message by ${ message.author.username } to queue (${ message.cleanContent })`);
+        Logger.log('VcChat', `Added message by ${ message.author.username } to queue (${ message.cleanContent })`);
         queue.push(message);
         return;
     }
@@ -118,7 +118,7 @@ function play(message: Message): void {
     const resource = createAudioResource(gtts.stream(ttsMessage));
 
     connection?.subscribe(player);
-    Logger.log(`[VcChat]: playing message "${ ttsMessage }" by ${ message.member?.displayName }`);
+    Logger.log('VcChat', `playing message "${ ttsMessage }" by ${ message.member?.displayName }`);
     player.play(resource);
     isSpeaking = true;
 

@@ -19,10 +19,10 @@ export default [
 
             if(vanity.uses < currentVanity.uses) {
                 // assume this is the newest join via invite
-                Logger.log(`[VanityKick]: Overriding old vanity with new`, vanity, currentVanity);
+                Logger.log('VanityKick', `Overriding old vanity with new`, vanity, currentVanity);
                 vanity = currentVanity;
 
-                Logger.log(`[VanityKick]: ${ member.user.username } joined via Vanity`);
+                Logger.log('VanityKick', `${ member.user.username } joined via Vanity`);
 
                 if(logChannel) {
                     await logChannel.send({
@@ -41,19 +41,19 @@ export default [
                             text: `@ ${ new Date().toUTCString() } via ${ member.client.user.username }`
                         }
                     }]
-                }).catch(() => Logger.error(`Failed to send message to ${ member.user.username }`));
+                }).catch(() => Logger.error('VanityKick', `Failed to send message to ${ member.user.username }`));
                 await member.kick(`Joined through Vanity.`);
                 return;
             }
 
-            Logger.log(`[VanityKick]: ${ member.user.username } joined via none vanity invite`);
+            Logger.log('VanityKick', `${ member.user.username } joined via none vanity invite`);
         },
     },
     {
         on: 'ready',
         enabled,
         async listener(client) {
-            Logger.log('[VanityKick]: Fetching guild');
+            Logger.log('VanityKick', 'Fetching guild');
             const guild = await client.guilds.fetch(guildId);
             if(!guild) {
                 throw new Error(`[VanityKick]: Failed to fetch guild with id ${ guildId }`);
@@ -61,16 +61,16 @@ export default [
 
             const querylogChannel = await guild.channels.fetch(logChannelId);
             if(!querylogChannel) {
-                Logger.error(`[VanityKick]: Failed to find logChannel with id ${ logChannelId } so no logs will be sent.`);
+                Logger.error('VanityKick', `Failed to find logChannel with id ${ logChannelId } so no logs will be sent.`);
             }
             else {
                 logChannel = querylogChannel as TextChannel;
-                Logger.log(`[VanityKick]: Found and bound vanity kick log channel (${ logChannel.name })`);
+                Logger.log('VanityKick', `Found and bound vanity kick log channel (${ logChannel.name })`);
             };
 
-            Logger.log(`[VanityKick]: Fetching vanity for ${ guild.name }`);
+            Logger.log('VanityKick', `Fetching vanity for ${ guild.name }`);
             vanity = await guild.fetchVanityData();
-            Logger.log(`[VanityKick]: Fetched and bound vanity (${ vanity.uses } uses, /${ vanity.code })`);
+            Logger.log('VanityKick', `Fetched and bound vanity (${ vanity.uses } uses, /${ vanity.code })`);
         },
     }
 ] as Events<['guildMemberAdd', 'ready']>;

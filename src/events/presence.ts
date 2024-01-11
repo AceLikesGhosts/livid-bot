@@ -25,19 +25,19 @@ export default [
         listener: (op, np) => {
             const member = np.member;
             if(!member) {
-                Logger.warn(`[Presence]: Recieved presenceUpdate for ${ np } but .member was not found`, np);
+                Logger.warn('vanityRep', `Recieved presenceUpdate for ${ np } but .member was not found`, np);
                 return;
             }
 
             const newHas = hasPresence(np);
             if(newHas) {
                 if(member.roles.cache.has(repRoleId)) {
-                    Logger.warn(`[Presence]: ${ member.user.username } had vanity rep role yet just added status`, member.roles.cache.has(repRoleId), newHas);
+                    Logger.warn('vanityRep', `${ member.user.username } had vanity rep role yet just added status`, member.roles.cache.has(repRoleId), newHas);
                     return;
                 }
 
                 member.roles.add(repRoleId);
-                Logger.log(`[Presence]: Added REP_ROLE_ID to user ${ member.user }`);
+                Logger.log('vanityRep', `Added REP_ROLE_ID to user ${ member.user }`);
                 return;
             }
 
@@ -48,12 +48,12 @@ export default [
             const oldHas = hasPresence(op);
             if(oldHas && !newHas) {
                 if(!member.roles.cache.has(repRoleId)) {
-                    Logger.warn(`[Presence]: ${ member.user.username } did not have vanity rep role yet just removed status`, member.roles.cache.has(repRoleId), newHas);
+                    Logger.warn('vanityRep', `${ member.user.username } did not have vanity rep role yet just removed status`, member.roles.cache.has(repRoleId), newHas);
                     return;
                 }
 
                 member.roles.remove(repRoleId);
-                Logger.log(`[Presence]: Removed REP_ROLE_ID from ${ member.user.username }`);
+                Logger.log('vanityRep', `Removed REP_ROLE_ID from ${ member.user.username }`);
             }
         }
     }

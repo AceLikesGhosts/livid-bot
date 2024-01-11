@@ -10,7 +10,8 @@
     },
     "vanityJoinKick": {
         "enabled": false,
-        "guildId": ""
+        "guildId": "",
+        "logChannelId": ""
     },
     "voiceChatTTS": {
         "enabled": true,

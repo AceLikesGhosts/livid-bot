@@ -1,10 +1,11 @@
-import type { Vanity } from 'discord.js';
+import type { TextChannel, Vanity } from 'discord.js';
 import { Events } from '../types/Event';
 import { Logger } from '../logger';
 import { vanityJoinKick } from '../../config.json';
-const { enabled, guildId } = vanityJoinKick;
+const { enabled, guildId, logChannelId } = vanityJoinKick;
 
 let vanity: Vanity;
+let logChannel: TextChannel;
 
 export default [
     {
@@ -22,6 +23,15 @@ export default [
                 vanity = currentVanity;
 
                 Logger.log(`[VanityKick]: ${ member.user.username } joined via Vanity`);
+
+                if(logChannel) {
+                    await logChannel.send({
+                        embeds: [{
+                            description: `${ member.user } tried to join via vanity`,
+                            color: 0x36393F
+                        }]
+                    });
+                }
 
                 await member.send({
                     embeds: [{
@@ -48,6 +58,15 @@ export default [
             if(!guild) {
                 throw new Error(`[VanityKick]: Failed to fetch guild with id ${ guildId }`);
             }
+
+            const querylogChannel = await guild.channels.fetch(logChannelId);
+            if(!querylogChannel) {
+                Logger.error(`[VanityKick]: Failed to find logChannel with id ${ logChannelId } so no logs will be sent.`);
+            }
+            else {
+                logChannel = querylogChannel as TextChannel;
+                Logger.log(`[VanityKick]: Found and bound vanity kick log channel (${ logChannel.name })`);
+            };
 
             Logger.log(`[VanityKick]: Fetching vanity for ${ guild.name }`);
             vanity = await guild.fetchVanityData();

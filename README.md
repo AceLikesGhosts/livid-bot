@@ -2,6 +2,54 @@
 
 a simple bot for [Livid](discord.gg/livid)
 
+## Features
+
+| Implemented |                    Feature name                     |
+| ----------- | :-------------------------------------------------: |
+| [x]         | [Vanity Presence Repping](#vanity-presecne-repping) |
+| [x]         |        [Vanity Join Kick](#vanity-join-kick)        |
+| [x]         |          [Voice Chat Text-To-Speech](#tts)          |
+
+<details>
+  <summary><i>Feature Explanation</i></summary>
+
+  <details id="vanity-presecne-repping">
+    <summary>Vanity Presence Repping</summary>
+
+    Gives a role if someone includes the vanity link within their custom status.
+  </details>
+
+  <details id="vanity-join-kick">
+    <summary>Vanity Join Kick</summary> 
+
+    Detects if someone joins through a vanity link, and kicks them.
+    Has an option for a log channel.
+  </details>
+
+  <details id="tts">
+    <summary>Voice Chat Text-To-Speech</summary>
+
+    Takes incoming messages within a voice channel's text area, and reads them out using Google's text to speech API.
+  </details>
+</details>
+
+## Configuration
+
+A generic configuration option will look around the following:
+```json
+{
+    "featureName": {
+        "enabled": true, // if the feature is enabled/if we should register it
+        "optionOrThing": "whatever",
+        "subfeature": {
+            "enabled": false // if the sub feature is enabled
+        }
+    }
+}
+```
+
+Each option within a feature should have a self explanatory name.
+
 ## Prerequisites
 
 - Node.js (v18.15.0) alongside npm

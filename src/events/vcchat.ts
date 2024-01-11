@@ -12,6 +12,8 @@ const gtts = new ngtts('en');
 
 /** seconds 👇 */
 const DISCONNECT_TIME = 15 * 1000;
+const NOT_ALLOWED_ALONE_CHARS = ['!', '(', ')', '[', ']', '¿', '?', '.', ',', ';', ':', '—', '«', '»', '\\'];
+const PHONETIC_VERSION = ['exclamation mark', 'left parenthese', 'right parenthese', 'left bracket', 'right bracket', 'question mark', 'question mark', 'period', 'comma', 'semi colon', 'colon', 'hypen', 'left double arrow', 'right double arrow', 'back slash'];
 
 let dcTimer: NodeJS.Timeout | null;
 let lastSpeaker: User;
@@ -27,6 +29,15 @@ function parseContent(message: Message): string {
     //<:trolldog:1164159121466073119>
     let content = message.cleanContent; // parses mentions
 
+    if(message.attachments && message.attachments.size >= 1) {
+        content += ` ${ message.attachments.size } attachments`;
+    }
+
+    const indexOfNotAllowedChar = NOT_ALLOWED_ALONE_CHARS.indexOf(content);
+    if(content.length === 1 && indexOfNotAllowedChar !== -1) {
+        content = PHONETIC_VERSION[indexOfNotAllowedChar];
+    }
+
     const results = content.match(/<(a:|:)\w+:\d+>/g);
     if(!results) return content;
     for(let i = 0; i < results?.length; i++) {
@@ -35,10 +46,6 @@ function parseContent(message: Message): string {
         if(!split[1]) continue;
 
         content.replace(result, split[1]);
-    }
-
-    if(message.attachments) {
-        content += ` ${ message.attachments.size } attachments`;
     }
 
     return content;
@@ -75,12 +82,20 @@ function connectToVC(channelId: string, guildId: string, voiceAdapterCreator: In
 }
 
 function play(message: Message): void {
+    if(isSpeaking) {
+        Logger.log(`[VcChat]: Added message by ${ message.author.username } to queue (${ message.cleanContent })`);
+        queue.push({ message: message });
+        return;
+    }
+
     const [connection, player] = connectToVC(message.channel.id, message.guild!.id, message.guild!.voiceAdapterCreator);
     clearTimeout(dcTimer!);
     dcTimer = null;
 
     const content = parseContent(message);
+    console.log(`parsed message content "${message.content}" to "${content}"`);
     let ttsMessage: string;
+
     if(lastSpeaker === message.author) {
         ttsMessage = content;
     }
@@ -90,12 +105,6 @@ function play(message: Message): void {
     lastSpeaker = message.author;
 
     const resource = createAudioResource(gtts.stream(ttsMessage));
-
-    if(isSpeaking) {
-        Logger.log(`[VcChat]: Added message by ${ message.author.username } to queue (${ message.cleanContent })`);
-        queue.push({ message: message });
-        return;
-    }
 
     connection?.subscribe(player);
     Logger.log(`[VcChat]: playing message "${ ttsMessage }" by ${ message.member?.displayName }`);

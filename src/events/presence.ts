@@ -32,7 +32,7 @@ export default [
             const newHas = hasPresence(np);
             if(newHas) {
                 if(member.roles.cache.has(repRoleId)) {
-                    Logger.warn(chalk.yellow(`[Presence]: Discord sent weird data? User had REP_ROLE_ID yet just now added vanity to presence.`));
+                    Logger.warn(`[Presence]: ${ member.user.username } had vanity rep role yet just added status`, member.roles.cache.has(repRoleId), newHas);
                     return;
                 }
 
@@ -48,12 +48,12 @@ export default [
             const oldHas = hasPresence(op);
             if(oldHas && !newHas) {
                 if(!member.roles.cache.has(repRoleId)) {
-                    Logger.warn(chalk.yellow(`[Presence]: Discord sent weird data? User did not have REP_ROLE_ID yet removed the vanity from their bio with their old having it?`));
+                    Logger.warn(`[Presence]: ${ member.user.username } did not have vanity rep role yet just removed status`, member.roles.cache.has(repRoleId), newHas);
                     return;
                 }
 
                 member.roles.remove(repRoleId);
-                Logger.log(`[Presence]: Removed REP_ROLE_ID from ${ member.user }`);
+                Logger.log(`[Presence]: Removed REP_ROLE_ID from ${ member.user.username }`);
             }
         }
     }

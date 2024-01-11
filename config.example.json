@@ -15,10 +15,14 @@
     },
     "voiceChatTTS": {
         "enabled": true,
-        "inVCOnly": true,
+        "inVCOnly": {
+            "enabled": true,
+            "ignoreAdmins": true
+        },
         "ttsban": {
             "enabled": false,
-            "roleId": ""
+            "roleId": "",
+            "ignoreAdmins": true
         }
     }
 }

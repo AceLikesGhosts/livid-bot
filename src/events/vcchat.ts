@@ -1,6 +1,6 @@
 import type { Events } from '../types/Event';
 
-import { User, type Message, TextChannel, Guild, InternalDiscordGatewayAdapterCreator, ChannelType } from 'discord.js';
+import { User, type Message, TextChannel, Guild, InternalDiscordGatewayAdapterCreator, ChannelType, GuildMember, PermissionsBitField } from 'discord.js';
 import config from '../../config.json';
 const { enabled } = config.voiceChatTTS;
 
@@ -55,6 +55,25 @@ function playNextInQueue(connection: VoiceConnection, lastPlace: LastVoiceData):
     const now = queue.splice(0, 1)[0]; // gets first element, and shifts everything
     Logger.log(`[VcChat]: Playing message from queue (${ now.author.username } | ${ now.cleanContent })`);
     return play(now);
+}
+
+/**
+ * Checks if the author is worthy of having their message read outloud.
+ */
+function shouldReadMessage(message: Message): boolean {
+    if(config.voiceChatTTS.inVCOnly.enabled && !message.member?.voice.channel) {
+        if(config.voiceChatTTS.inVCOnly.ignoreAdmins && message.member?.permissions.has(PermissionsBitField.Flags.Administrator)) return true;
+        Logger.log(`[VcChat]: ${ message.author.username } tried to send a message while not in the voice channel`);
+        return false;
+    }
+
+    if(config.voiceChatTTS.ttsban.enabled && message.member?.roles.cache.has(config.voiceChatTTS.ttsban.roleId)) {
+        if(config.voiceChatTTS.ttsban.ignoreAdmins && message.member.permissions.has(PermissionsBitField.Flags.Administrator)) return true;
+        Logger.log(`[VcChat]: ${ message.author.username } tried to send a message while TTS banned`);
+        return false;
+    }
+
+    return true;
 }
 
 function connectToVC(channelId: string, guildId: string, voiceAdapterCreator: InternalDiscordGatewayAdapterCreator): [VoiceConnection, AudioPlayer] {
@@ -151,15 +170,7 @@ export default [
                 return;
             }
 
-            if(config.voiceChatTTS.inVCOnly && !message.member?.voice?.channel || message.member?.voice?.channel !== message.channel) {
-                // Simply react to inform them that their message was not read VIA TTS.
-                Logger.log(`[VcChat]: ${ message.author.username } tried to send a message while not in the voice channel`);
-                await message.react('❌');
-                return;
-            }
-
-            if(config.voiceChatTTS.ttsban.enabled && message.member.roles.cache.has(config.voiceChatTTS.ttsban.roleId)) {
-                Logger.log(`[VcChat]: ${ message.author.username } tried to send a message while TTS banned`);
+            if(!shouldReadMessage(message)) {
                 await message.react('❌');
                 return;
             }

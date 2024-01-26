@@ -43,7 +43,7 @@ export default async function init(client: Client): Promise<void> {
             
             if(!event.enabled) {
                 Logger.log('MAIN::EVENTS', `Skipping event ${ event.on } because it was disabled.`);
-                return;
+                continue;
             }
 
             Logger.log('MAIN::EVENTS', `Registered event ${ event.on } from ${ file.substr(file.lastIndexOf('/'), file.length) }`);

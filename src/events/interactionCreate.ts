@@ -1,3 +1,4 @@
+import toggle from '../commands/toggle';
 import status from '../commands/status';
 import { Events } from '../types/Event';
 import type { ChatInputCommandInteraction } from 'discord.js';
@@ -12,8 +13,13 @@ export default [
                 return;
             }
 
-            if(interaction.commandName === 'status') {
-                return void status.execute(interaction as ChatInputCommandInteraction);
+            switch(interaction.commandName) {
+                case 'status': {
+                    return void status.execute(interaction as ChatInputCommandInteraction);
+                }
+                case 'toggle': {
+                    return void toggle.execute(interaction as ChatInputCommandInteraction);
+                }
             }
         },
     }

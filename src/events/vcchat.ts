@@ -7,6 +7,7 @@ const { enabled } = config.voiceChatTTS;
 import ngtts from 'node-gtts';
 import { Logger } from '../logger';
 import { AudioPlayer, AudioPlayerStatus, NoSubscriberBehavior, VoiceConnection, VoiceConnectionStatus, createAudioPlayer, createAudioResource, getVoiceConnection, joinVoiceChannel } from '@discordjs/voice';
+import { isAllowedToRunByFeatureToggle } from '.';
 const gtts = new ngtts('en');
 
 /** seconds 👇 */
@@ -165,6 +166,8 @@ export default [
         on: 'messageCreate',
         enabled,
         async listener(message) {
+            if(!isAllowedToRunByFeatureToggle('voiceChatTTS')) return;
+
             // don't care! we only want to TTS voice chat channel messages
             if(message.channel.type !== ChannelType.GuildVoice || !message.guild?.id || message.author.bot) {
                 return;

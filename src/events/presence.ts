@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import { Logger } from '../logger';
 import config from '../../config.json';
 import { Events } from '../types/Event';
+import { isAllowedToRunByFeatureToggle } from '.';
 const { enabled, repRoleId } = config.presenceVanityRep;
 const { link: vanity } = config.vanity;
 
@@ -23,6 +24,8 @@ export default [
         on: 'presenceUpdate',
         enabled,
         listener: (op, np) => {
+            if(!isAllowedToRunByFeatureToggle('presenceVanityRep')) return;
+
             const member = np.member;
             if(!member) {
                 Logger.warn('vanityRep', `Recieved presenceUpdate for ${ np } but .member was not found`, np);

@@ -2,6 +2,7 @@ import type { Awaitable, Client } from 'discord.js';
 import { lstatSync, readdirSync } from 'fs';
 import { Logger } from '../logger';
 import { Events } from '../types/Event';
+import { ToggleableFeatures } from '../';
 
 function walk(directory: string, outData: string[] = []): string[] {
     const files = readdirSync(directory);
@@ -19,6 +20,10 @@ function walk(directory: string, outData: string[] = []): string[] {
     }
 
     return outData;
+}
+
+export function isAllowedToRunByFeatureToggle(featureName: string): boolean {
+    return ToggleableFeatures.get(featureName) ?? true;
 }
 
 export default async function init(client: Client): Promise<void> {
@@ -40,7 +45,7 @@ export default async function init(client: Client): Promise<void> {
         Logger.log(`events:`, events);
         for(let j = 0; j < events.length; j++) {
             const event = events[j];
-            
+
             if(!event.enabled) {
                 Logger.log('MAIN::EVENTS', `Skipping event ${ event.on } because it was disabled.`);
                 continue;

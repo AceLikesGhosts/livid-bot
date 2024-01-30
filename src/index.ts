@@ -3,6 +3,11 @@ import config from '../config.json';
 import { Logger } from './logger';
 import init from './events';
 
+export const ToggleableFeatures = new Map<string, boolean>();
+ToggleableFeatures.set('presenceVanityRep', config.presenceVanityRep.enabled);
+ToggleableFeatures.set('vanityJoinKick', config.vanityJoinKick.enabled);
+ToggleableFeatures.set('voiceChatTTS', config.voiceChatTTS.enabled);
+
 const client = new Client({
     intents: [
         'GuildMembers',

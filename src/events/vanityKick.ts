@@ -2,6 +2,7 @@ import type { TextChannel, Vanity } from 'discord.js';
 import { Events } from '../types/Event';
 import { Logger } from '../logger';
 import { vanityJoinKick } from '../../config.json';
+import { isAllowedToRunByFeatureToggle } from '.';
 const { enabled, guildId, logChannelId } = vanityJoinKick;
 
 let vanity: Vanity;
@@ -12,6 +13,8 @@ export default [
         on: 'guildMemberAdd',
         enabled,
         async listener(member) {
+            if(!isAllowedToRunByFeatureToggle('vanityJoinKick')) return;
+            
             // wasn't our guild with vanity/what we're watching, we don't care!
             if(member.guild.id !== guildId) return;
 
